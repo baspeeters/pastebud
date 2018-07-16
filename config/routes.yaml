@@ -4,3 +4,7 @@
 #index:
 #    path: /
 #    defaults: { _controller: 'App\Controller\DefaultController::index' }
+
+pastables:
+  type: rest
+  resource: App\Entity\Pastable
