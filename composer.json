@@ -1,6 +1,15 @@
 {
+    "name": "Pastebud",
+    "description": "A clipboard platform",
     "type": "project",
     "license": "proprietary",
+    "authors": [
+        {
+            "name": "Bas Peeters",
+            "email": "bas@peete.rs",
+            "homepage": "https://bas.peete.rs"
+        }
+    ],
     "require": {
         "php": "^7.0.8",
         "ext-iconv": "*",
