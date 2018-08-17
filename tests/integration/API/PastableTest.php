@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\API;
+namespace App\Tests\Integration\API;
 
 use App\Tests\RESTApiTestCase;
 
@@ -18,7 +18,6 @@ class PastableTest extends RESTApiTestCase
         ];
         $this->post(self::OBJECT_NAME, $pastablesData[0]);
         $this->post(self::OBJECT_NAME, $pastablesData[1]);
-
         // And we call the endpoint for listing pastables
         $responseForList = $this->list(self::OBJECT_NAME);
 
@@ -123,6 +122,7 @@ class PastableTest extends RESTApiTestCase
         // And we call the endpoint to delete that pastable
         self::arrayHasKey('id', $responseForCreate);
         $this->delete(self::OBJECT_NAME, $responseForCreate['id']);
+
 
         // It should return a response with a 204 code
         self::assertEquals(204, $this->client->getResponse()->getStatusCode());

@@ -22,10 +22,10 @@
             <file>tests/TestTest.php</file>
         </testsuite>
         <testsuite name="unit">
-            <directory suffix="Test.php" phpVersionOperator=">=">tests/Entity</directory>
+            <directory suffix="Test.php" phpVersionOperator=">=">tests/unit</directory>
         </testsuite>
         <testsuite name="integration">
-            <directory suffix="Test.php" phpVersionOperator=">=">tests/API</directory>
+            <directory suffix="Test.php" phpVersionOperator=">=">tests/integration</directory>
         </testsuite>
     </testsuites>
 

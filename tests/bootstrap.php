@@ -2,9 +2,11 @@
 
 include_once 'vendor/symfony/dotenv/Dotenv.php';
 
-function reset_db() {
+function reset_db()
+{
     exec(sprintf('php "%s/../bin/console" doctrine:schema:drop --force --full-database', __DIR__));
     exec(sprintf('php "%s/../bin/console" doctrine:migrations:migrate --no-interaction', __DIR__));
+    exec(sprintf('php "%s/../bin/console" doctrine:fixtures:load --no-interaction', __DIR__));
 }
 
 if (isset($_ENV['BOOTSTRAP_CLEAR_CACHE_ENV'])) {
