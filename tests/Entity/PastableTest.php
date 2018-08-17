@@ -3,7 +3,6 @@
 namespace App\Tests\Entity;
 
 use App\Entity\Pastable;
-use App\Service\PastableManager;
 use PHPUnit\Framework\TestCase;
 
 class PastableTest extends TestCase

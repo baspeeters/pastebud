@@ -2,82 +2,78 @@
 
 namespace App\Tests;
 
-use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpKernel\Client;
-use Unirest\Request;
-use Unirest\Request\Body;
-use Unirest\Response;
 
 class RESTApiTestCase extends WebTestCase
 {
     /** @var Client $client */
     protected $client;
 
-    /** @var EntityManager $em */
-    protected $em;
-
     /** @var string $baseUrl */
     protected $baseUrl;
 
     const HEADERS = [
-        'content-type' => 'application/json',
-        'accept' => 'application/json',
+        'CONTENT_TYPE' => 'application/json',
+        'ACCEPT' => 'application/json',
     ];
 
     public function __construct(string $name = null, array $data = [], string $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
 
-        $this->baseUrl = 'http://localhost:8000/api/';
+        $this->client = self::createClient();
+        $this->baseUrl = $_SERVER['TEST_SERVER_URL'];
     }
 
-    public function list($path, $params = null, array $headers = [])
+    public function list($path, array $parameters = [], array $headers = [])
     {
-        return Request::get(
-            $this->baseUrl . $path . '.json',
+        return $this->request('GET', $path, null, $parameters, $headers);
+    }
+
+    public function post($path, array $body = [], array $parameters = [], array $files = [], array $headers = [])
+    {
+        return $this->request('POST', $path, null, $parameters, $files, $headers, json_encode($body));
+    }
+
+    public function put($path, $id, array $body = [], array $parameters = [], array $files = [], array $headers = [])
+    {
+        return $this->request('PUT', $path, $id, $parameters, $files, $headers, json_encode($body));
+    }
+
+    public function delete($path, $id, array $parameters = [], array $headers = [])
+    {
+        return $this->request('DELETE', $path, $id, $parameters, [], $headers);
+    }
+
+    public function get($path, $id, array $parameters = [], array $headers = [])
+    {
+        return $this->request('GET', $path, $id, $parameters, [], $headers);
+    }
+
+    public function request($method, $path, $id = null, $parameters = [], $files = [], $headers = [], $body = [])
+    {
+        $this->client->request(
+            $method,
+            $this->getApiUrl($path, $id),
+            $parameters,
+            $files,
             $headers + self::HEADERS,
-            $params
+            $body
         );
+
+        return json_decode($this->client->getResponse()->getContent(), true);
     }
 
-    public function post($path, $body = null, array $headers = [])
+    /**
+     * @param string $path
+     * @param null $id
+     * @return string
+     */
+    protected function getApiUrl(string $path, $id = null): string
     {
-        return Request::post(
-            $this->baseUrl . $path . '.json',
-            $headers + self::HEADERS,
-            Body::Json($body)
-        );
-    }
-
-    public function put($path, $id, $body = null, array $headers = [])
-    {
-        return Request::put(
-            $this->baseUrl . $path . '/' . $id . '.json',
-            $headers + self::HEADERS,
-            Body::Json($body)
-        );
-    }
-
-    public function delete($path, $id, array $headers = [])
-    {
-        return Request::delete(
-            $this->baseUrl . $path . '/' . $id . '.json',
-            $headers + self::HEADERS
-        );
-    }
-
-    public function get($path, $id, $params = null, array $headers = [])
-    {
-        return Request::get(
-            $this->baseUrl . $path . '/' . $id . '.json',
-            $headers + self::HEADERS,
-            $params
-        );
-    }
-
-    public static function getArrayResponseBody(Response $response)
-    {
-        return json_decode($response->raw_body, true);
+        return is_null($id) !== false
+            ? $this->baseUrl . $path . '.json'
+            : $this->baseUrl . $path . '/' . $id . '.json';
     }
 }

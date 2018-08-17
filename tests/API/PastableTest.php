@@ -20,14 +20,13 @@ class PastableTest extends RESTApiTestCase
         $this->post(self::OBJECT_NAME, $pastablesData[1]);
 
         // And we call the endpoint for listing pastables
-        $response = $this->list(self::OBJECT_NAME);
+        $responseForList = $this->list(self::OBJECT_NAME);
 
         // It should return a 200 response with the created objects
-        $arrayResponseBody = self::getArrayResponseBody($response);
-        self::assertEquals(200, $response->code);
-        self::assertCount(2, $arrayResponseBody);
-        self::assertArraySubset($pastablesData[0], $arrayResponseBody[0]);
-        self::assertArraySubset($pastablesData[1], $arrayResponseBody[1]);
+        self::assertEquals(200, $this->client->getResponse()->getStatusCode());
+        self::assertCount(2, $responseForList);
+        self::assertArraySubset($pastablesData[0], $responseForList[0]);
+        self::assertArraySubset($pastablesData[1], $responseForList[1]);
     }
 
     /** @test */
@@ -38,12 +37,11 @@ class PastableTest extends RESTApiTestCase
             'name' => 'create-test',
             'content' => 'Test to create a pastable',
         ];
-        $response = $this->post(self::OBJECT_NAME, $data);
-        $arrayResponseBody = self::getArrayResponseBody($response);
+        $responseForCreate = $this->post(self::OBJECT_NAME, $data);
 
         // It should return a 201 response with the created object
-        self::assertEquals(201, $response->code);
-        self::assertArraySubset($data, $arrayResponseBody);
+        self::assertEquals(201, $this->client->getResponse()->getStatusCode());
+        self::assertArraySubset($data, $responseForCreate);
     }
 
     /** @test */
@@ -56,10 +54,10 @@ class PastableTest extends RESTApiTestCase
         ];
 
         // Then when we call the create endpoint with that data
-        $response = $this->post(self::OBJECT_NAME, $dataForCreate);
+        $this->post(self::OBJECT_NAME, $dataForCreate);
 
         // It should return a 400 response
-        self::assertEquals(400, $response->code);
+        self::assertEquals(400, $this->client->getResponse()->getStatusCode());
     }
 
     /** @test */
@@ -73,12 +71,12 @@ class PastableTest extends RESTApiTestCase
         $responseForCreate = $this->post(self::OBJECT_NAME, $dataForCreate);
 
         // Then when we request to get the pastable
-        $responseForGet = $this->get(self::OBJECT_NAME, $responseForCreate->body->id);
-        $arrayResponseBodyForGet = self::getArrayResponseBody($responseForGet);
+        self::arrayHasKey('id', $responseForCreate);
+        $responseForGet = $this->get(self::OBJECT_NAME, $responseForCreate['id']);
 
         // It should return a 200 response with the requested object
-        self::assertEquals(200, $responseForGet->code);
-        self::assertArraySubset($dataForCreate, $arrayResponseBodyForGet);
+        self::assertEquals(200, $this->client->getResponse()->getStatusCode());
+        self::assertArraySubset($dataForCreate, $responseForGet);
     }
 
     /** @test */
@@ -90,36 +88,32 @@ class PastableTest extends RESTApiTestCase
             'content' => 'Test to edit a pastable',
         ];
         $responseForCreate = $this->post(self::OBJECT_NAME, $dataForCreate);
-        $arrayResponseBodyForCreate = self::getArrayResponseBody($responseForCreate);
 
         // And we call the endpoint to edit the pastable
         $dataForEdit = [
             'name' => 'edit-test-edited',
             'content' => 'Test to edit a pastable (this has been edited now)',
         ];
-        $dataForEditWithId = $dataForEdit + $arrayResponseBodyForCreate;
-        $responseForEdit = $this->put(self::OBJECT_NAME, $responseForCreate->body->id, $dataForEdit);
-        $arrayResponseBodyForEdit = self::getArrayResponseBody($responseForEdit);
+        $dataForEditWithId = $dataForEdit + $responseForCreate;
+        self::arrayHasKey('id', $responseForCreate);
+        $responseForEdit = $this->put(self::OBJECT_NAME, $responseForCreate['id'], $dataForEdit);
 
         // It should give a 200 response with the edited object
-        self::assertEquals(200, $responseForEdit->code);
-        self::assertEquals($dataForEditWithId, $arrayResponseBodyForEdit);
+        self::assertEquals(200, $this->client->getResponse()->getStatusCode());
+        self::assertEquals($dataForEditWithId, $responseForEdit);
 
         // Then when we call the endpoint to get the object
-        $responseForGet = $this->get(self::OBJECT_NAME, $responseForCreate->body->id);
-        $arrayResponseBodyForGet = self::getArrayResponseBody($responseForGet);
+        $responseForGet = $this->get(self::OBJECT_NAME, $responseForCreate['id']);
 
         // It should return a 200 response with the edited object containing the edited values
-        self::assertEquals(200, $responseForGet->code);
-        self::assertEquals($dataForEditWithId, $arrayResponseBodyForGet);
-        self::assertEquals($dataForCreate, array_diff($arrayResponseBodyForCreate, $arrayResponseBodyForGet));
+        self::assertEquals(200, $this->client->getResponse()->getStatusCode());
+        self::assertEquals($dataForEditWithId, $responseForGet);
+        self::assertEquals($dataForCreate, array_diff($responseForCreate, $responseForGet));
     }
 
     /** @test */
     public function it_deletes_pastables()
     {
-//        self::markTestIncomplete();
-
         // Given that we have a pastable
         $responseForCreate = $this->post(self::OBJECT_NAME, [
             'name' => 'delete-test',
@@ -127,15 +121,16 @@ class PastableTest extends RESTApiTestCase
         ]);
 
         // And we call the endpoint to delete that pastable
-        $responseForDelete = self::delete(self::OBJECT_NAME, $responseForCreate->body->id);
+        self::arrayHasKey('id', $responseForCreate);
+        $this->delete(self::OBJECT_NAME, $responseForCreate['id']);
 
         // It should return a response with a 204 code
-        self::assertEquals(204, $responseForDelete->code);
+        self::assertEquals(204, $this->client->getResponse()->getStatusCode());
 
         // Then when we call the endpoint to get the pastable
-        $responseForGet = $this->get(self::OBJECT_NAME, $responseForCreate->body->id);
+        $this->get(self::OBJECT_NAME, $responseForCreate['id']);
 
         // It should return a 404 response
-        self::assertEquals(404, $responseForGet->code);
+        self::assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
 }
