@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bas
- * Date: 7/11/18
- * Time: 4:31 AM
- */
 
 namespace App\Traits;
-
 
 use Doctrine\ORM\Mapping as ORM;
 
